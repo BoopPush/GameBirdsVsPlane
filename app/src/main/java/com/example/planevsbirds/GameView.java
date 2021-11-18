@@ -119,8 +119,14 @@ public class GameView extends SurfaceView implements Runnable{
                 break;
             case MotionEvent.ACTION_UP:
                 flight.isGoingUp = false;
+                if (event.getX() > screenX / 2.0){
+                    flight.toShoot++;
+                }
                 break;
         }
         return true;
+    }
+
+    public void newBullet() {
     }
 }
