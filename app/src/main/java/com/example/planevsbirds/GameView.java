@@ -7,6 +7,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
@@ -23,11 +27,12 @@ public class GameView extends SurfaceView implements Runnable{
     private List<Bullet> bullets;
     public static float screenRatioX, screenRatioY;
     private Paint paint;
+    private int sound;
     private SharedPreferences prefs;
     private GameActivity activity;
     private Random random;
     private Bird[] birds;
-    private 
+    private SoundPool soundPool;
     private Flight flight;
     private Background background1,background2;
 
@@ -37,6 +42,24 @@ public class GameView extends SurfaceView implements Runnable{
 
         this.activity = activity;
         prefs = activity.getSharedPreferences("game",Context.MODE_PRIVATE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .build();
+
+            soundPool = new SoundPool.Builder()
+                    .setAudioAttributes(audioAttributes)
+                    .build();
+
+        }
+        else{
+            soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC,0);
+        }
+
+        sound = soundPool.load(activity, R.raw.shoot,1);
         this.screenX = screenX;
         this.screenY = screenY;
         screenRatioX = 1920f / screenX;
@@ -247,6 +270,10 @@ public class GameView extends SurfaceView implements Runnable{
     }
 
     public void newBullet() {
+
+        if (!prefs.getBoolean("isMute",false)){
+            soundPool.play(sound,1,1,0,0,1);
+        }
 
         Bullet bullet = new Bullet(getResources());
         bullet.x = flight.x+flight.width;
