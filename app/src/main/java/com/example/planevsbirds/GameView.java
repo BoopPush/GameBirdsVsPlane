@@ -3,6 +3,7 @@ package com.example.planevsbirds;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
@@ -14,7 +15,7 @@ import java.util.Random;
 public class GameView extends SurfaceView implements Runnable{
 
     Thread thread;
-    private boolean isPlaying;
+    private boolean isPlaying, isGameOver = false;
     private int screenX,screenY;
     private List<Bullet> bullets;
     public static float screenRatioX, screenRatioY;
@@ -97,6 +98,14 @@ public class GameView extends SurfaceView implements Runnable{
             }
 
             bullet.x += 50 * screenRatioX;
+            for (Bird bird:birds){
+                if(Rect.intersects(bird.getCollisionShape(),
+                        bullet.getCollisionShape())){
+                    bird.x = - 500;
+                    bullet.x = screenX+500;
+                    bird.wasShot = true;
+                }
+            }
         }
 
         for (Bullet bullet:trash){
@@ -106,12 +115,27 @@ public class GameView extends SurfaceView implements Runnable{
         for (Bird bird: birds){
             bird.x -= bird.speed;
             if(bird.x+bird.width < 0){
+
+                if (!bird.wasShot){
+                    isGameOver = true;
+                    return;
+                }
                 int bound = (int) (30 * screenRatioX);
                 bird.speed = random.nextInt(bound);
 
                 if(bird.speed < 10 * screenRatioX){
                     bird.speed = (int) (10 * screenRatioX);
                 }
+
+                bird.x = screenX;
+                bird.y = random.nextInt(screenY - bird.height);
+
+                bird.wasShot = false;
+            }
+
+            if (Rect.intersects(bird.getCollisionShape(), flight.getCollisionShape())){
+                isGameOver = true;
+                return;
             }
         }
     }
@@ -124,6 +148,17 @@ public class GameView extends SurfaceView implements Runnable{
             canvas.drawBitmap(background1.background, background1.x, background1.y, paint);
             canvas.drawBitmap(background2.background, background2.x, background2.y, paint);
 
+
+            if (isGameOver){
+                isPlaying = false;
+                canvas.drawBitmap(flight.getDead(), flight.x,flight.y,paint);
+                getHolder().unlockCanvasAndPost(canvas);
+                return;
+            }
+
+            for (Bird bird : birds){
+                canvas.drawBitmap(bird.getBird(), bird.x,bird.y, paint);
+            }
             canvas.drawBitmap(flight.getFlight(), flight.x,flight.y,paint);
 
             for (Bullet bullet:bullets){
