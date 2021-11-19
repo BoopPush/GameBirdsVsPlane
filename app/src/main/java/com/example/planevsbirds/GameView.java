@@ -148,7 +148,10 @@ public class GameView extends SurfaceView implements Runnable{
             canvas.drawBitmap(background1.background, background1.x, background1.y, paint);
             canvas.drawBitmap(background2.background, background2.x, background2.y, paint);
 
-
+            for (Bird bird : birds){
+                canvas.drawBitmap(bird.getBird(), bird.x,bird.y, paint);
+            }
+            
             if (isGameOver){
                 isPlaying = false;
                 canvas.drawBitmap(flight.getDead(), flight.x,flight.y,paint);
@@ -156,9 +159,7 @@ public class GameView extends SurfaceView implements Runnable{
                 return;
             }
 
-            for (Bird bird : birds){
-                canvas.drawBitmap(bird.getBird(), bird.x,bird.y, paint);
-            }
+
             canvas.drawBitmap(flight.getFlight(), flight.x,flight.y,paint);
 
             for (Bullet bullet:bullets){
