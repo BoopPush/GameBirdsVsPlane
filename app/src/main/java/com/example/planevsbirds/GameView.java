@@ -191,9 +191,10 @@ public class GameView extends SurfaceView implements Runnable{
             if (isGameOver){
                 isPlaying = false;
                 canvas.drawBitmap(flight.getDead(), flight.x,flight.y,paint);
+                getHolder().unlockCanvasAndPost(canvas);
                 saveIfHighScore();
                 waitBeforeExiting();
-                getHolder().unlockCanvasAndPost(canvas);
+
                 return;
             }
 
